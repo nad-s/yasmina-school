@@ -13,14 +13,14 @@ class StudentController extends Controller
         $user = $request->user();
 
         if ($user->role === 'admin') {
-            return response()->json(Student::with('user', 'classroom')->get());
+            return response()->json(Student::with('user', 'classroom')->paginate(10));
         }
 
         if ($user->role === 'teacher') {
             return response()->json(
                 Student::with('user', 'classroom')
                     ->whereHas('classroom', fn($q) => $q->where('teacher_id', $user->id))
-                    ->get()
+                    ->paginate(10)
             );
         }
 

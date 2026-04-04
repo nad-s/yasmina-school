@@ -40,7 +40,11 @@
                     </tr>
                 </tbody>
             </table>
-
+            <div class="pagination">
+                <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Previous</button>
+                <span>Page {{ currentPage }} of {{ totalPages }}</span>
+                <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Next</button>
+            </div>
             <!-- Modal -->
             <div v-if="showModal" class="modal-overlay">
                 <div class="modal">
@@ -86,11 +90,20 @@ const showModal = ref(false)
 const editing = ref(null)
 const form = ref({ user_id: '', date_of_birth: '', assigned_class_id: '', grade: '' })
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+
 async function fetchStudents() {
     loading.value = true
-    const res = await api.get('/students')
-    students.value = res.data
+    const res = await api.get(`/students?page=${currentPage.value}`)
+    students.value = res.data.data
+    totalPages.value = res.data.last_page
     loading.value = false
+}
+
+async function changePage(page) {
+    currentPage.value = page
+    fetchStudents()
 }
 
 function openCreate() {
@@ -138,6 +151,12 @@ onMounted(fetchStudents)
 </script>
 
 <style scoped>
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
 .layout { display: flex; min-height: 100vh; }
 .sidebar {
     width: 220px;
